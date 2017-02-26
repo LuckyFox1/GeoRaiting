@@ -1,9 +1,9 @@
 'use strict';
 
-const host = 'localhost';
+const host = process.env.HOST;
 
 module.exports = {
     port: 3000,
-    ip: '127.0.0.1',
+    ip: host,
     mongoUrl: `mongodb://${host}/georaiting`
 };
