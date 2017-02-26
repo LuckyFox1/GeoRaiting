@@ -1,10 +1,11 @@
+'use strict';
+
 const express = require('express'),
     http = require('http'),
     path = require('path'),
     bodyParser = require('body-parser');
 
-const routes = require('./routes'),
-    config = require('./config');
+const config = require('./config');
 
 const app = express();
 
@@ -13,7 +14,7 @@ require('./db');
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use(routes);
+require('./routes')(app);
 
 http.createServer(app).listen(config.port, function () {
     console.log('Express server listening on port ' + config.port);
@@ -27,8 +28,7 @@ app.use((req, res, next) => {
 
 app.use((error, req, res, next) => {
     if (error) {
-        console.log(error);
-        return res.status(400).json({error});
+        return res.status(400).json({error: error.message || ""});
     }
     next(error);
 });
