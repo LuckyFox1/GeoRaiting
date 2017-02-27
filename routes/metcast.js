@@ -17,11 +17,16 @@ router.get('/', (req, res, next) => {
 
             for (let i = 0; i < metcasts.length; i++) {
                 sum = 0;
-                for(let j = 0; j < metcasts[i].rating.length; j++) {
+                for (let j = 0; j < metcasts[i].rating.length; j++) {
                     sum += metcasts[i].rating[j].isPositive;
                 }
                 metcasts[i].rating = (sum / tmpMetcasts[i].rating.length || 0).toFixed(1);
             }
+
+            metcasts.sort((metcastA, metcastB) => {
+                return metcastB.rating - metcastA.rating;
+            });
+
             res.json({metcasts});
         })
         .catch(next);
