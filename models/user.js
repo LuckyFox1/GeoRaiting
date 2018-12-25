@@ -1,14 +1,17 @@
 'use strict';
 
 const mongoose = require('mongoose');
+mongoose.plugin(schema => { schema.options.usePushEach = true });
 
 const Like = require('./like');
 
 const user = new mongoose.Schema({
-    fb_id: {
+    name: {
         type: String,
         unique: true
     },
+    password: String,
+    roles: [String],
     likes: [{type: mongoose.Schema.Types.ObjectId, ref: 'Like'}]
 });
 

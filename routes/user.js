@@ -1,10 +1,11 @@
 'use strict';
 
 const express = require('express');
-
+const md5 = require('md5');
 const User = require('../models/user');
 
 const postUser = require('../middleware/postForUser');
+const postUserFb = require('../middleware/postForUserFb');
 
 const router = express.Router();
 
@@ -16,7 +17,15 @@ router.get('/user/:fbId', (req, res, next) => {
         .catch(next);
 });
 
-router.post('/user/:fbId', postUser, (req, res, next) => {
+router.get('/user', (req, res, next) => {
+    User.find({fb_id: req.params.fbId}).populate('likes')
+        .then(user => {
+            res.json({user});
+        })
+        .catch(next);
+});
+
+router.post('/user/:fbId', postUserFb, (req, res, next) => {
     User.find({fb_id: req.params.fbId})
         .then(user => {
             if (user.length === 0) {
@@ -29,6 +38,31 @@ router.post('/user/:fbId', postUser, (req, res, next) => {
             } else {
                 res.json({user});
             }
+        })
+        .catch(next);
+});
+
+router.post('/register', postUser, (req, res, next) => {
+    User.find({ name: req.body.user.name })
+        .then(user => {
+            if (user.length === 0) {
+                new User({ name: req.body.user.name, password: md5(req.body.user.password), roles: ['user'] })
+                    .save()
+                    .then(user => {
+                        res.json({user});
+                    })
+                    .catch(next);
+            } else {
+                res.json({ message: 'User with the same name already exists.' });
+            }
+        })
+        .catch(next);
+});
+
+router.post('/login', (req, res, next) => {
+    User.findOne({name: req.body.user.name, password: md5(req.body.user.password)}).populate('likes')
+        .then(user => {
+            res.json({user});
         })
         .catch(next);
 });

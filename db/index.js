@@ -1,10 +1,11 @@
 'use strict';
 
 const mongoose = require('mongoose'),
-
     config = require('../config');
 
-mongoose.connect(config.mongoUrl, err => {
+mongoose.Promise = global.Promise;
+
+mongoose.connect(config.mongoUrl, { useMongoClient: true }, err => {
     if (err) throw err;
 });
 

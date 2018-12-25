@@ -7,13 +7,17 @@ module.exports = ajv.compile({
     properties:{
         user:{
             type:"object",
-            properties:{
-                fb_id:{
+            properties: {
+                name: {
+                    type:"string"
+                },
+                password: {
                     type:"string"
                 }
             },
             required:[
-                "fb_id"
+                "name",
+                "password"
             ]
         }
     },

@@ -9,7 +9,7 @@ const postMetcast = require('../middleware/postForMetcast'),
 
 const router = express.Router();
 
-router.get('/', (req, res, next) => {
+router.get('/metcasts', (req, res, next) => {
     Metcast.find({}).populate('rating')
         .then(tmpMetcasts => {
             let sum = 0;
@@ -32,43 +32,31 @@ router.get('/', (req, res, next) => {
         .catch(next);
 });
 
-router.post('/', postMetcast, (req, res, next) => {
-    if (req.header('Authorization') === process.env.SECRET) {
-        new Metcast(req.body.metcast)
-            .save()
-            .then(metcast => {
-                res.json({metcast});
-            })
-            .catch(next);
-    } else {
-        res.send('Wrong authorization key');
-    }
+router.post('/metcasts', postMetcast, (req, res, next) => {
+    new Metcast(req.body.metcast)
+        .save()
+        .then(metcast => {
+            res.json({metcast});
+        })
+        .catch(next);
 });
 
 router.put('/:metcastId', putMetcast, (req, res, next) => {
-    if (req.header('Authorization') === process.env.SECRET) {
-        Metcast.findOneAndUpdate({_id: req.params.metcastId}, req.body.metcast)
-            .then(metcast => {
-                res.json({
-                    metcast: Object.assign(metcast.toObject(), req.body.metcast)
-                });
-            })
-            .catch(next);
-    } else {
-        res.send('Wrong authorization key');
-    }
+    Metcast.findOneAndUpdate({_id: req.params.metcastId}, req.body.metcast)
+         .then(metcast => {
+             res.json({
+                 metcast: Object.assign(metcast.toObject(), req.body.metcast)
+             });
+         })
+         .catch(next);
 });
 
 router.delete('/:metcastId', (req, res, next) => {
-    if (req.header('Authorization') === process.env.SECRET) {
-        Metcast.remove({_id: req.params.metcastId})
-            .then(() => {
-                res.json({message: 'Metcast delete!'});
-            })
-            .catch(next);
-    } else {
-        res.send('Wrong authorization key');
-    }
+    Metcast.remove({_id: req.params.metcastId})
+        .then(() => {
+            res.json({message: 'Metcast delete!'});
+        })
+        .catch(next);
 });
 
 module.exports = router;

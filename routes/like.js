@@ -39,20 +39,30 @@ router.post('/like', postlike, (req, res, next) => {
 
                         Promise.all([
                             Metcast
-                                .findOne({_id: tmpLike.metcast_id})
+                                .findOne({_id: tmpLike.metcast_id}).populate('rating')
                                 .then(metcast => {
                                     metcast.rating.push(tmpLike._id);
                                     metcast.save();
-                                }),
+                                })
+                                .catch(next),
 
                             User
                                 .findOne({_id: tmpLike.user_id})
                                 .then(user => {
                                     user.likes.push(tmpLike._id);
                                     user.save();
-                                })
+                                }).catch(next)
                         ]).then(() => {
-                            res.json({like});
+                            Metcast
+                                .findOne({_id: req.body.like.metcast_id}).populate('rating')
+                                .then(metcast => {
+                                    let ratingSum = 0;
+                                    for (let i = 0; i < metcast.rating.length; i++) {
+                                        ratingSum += metcast.rating[i].isPositive;
+                                    }
+                                    let newRating = ((ratingSum + req.body.like.isPositive) / (metcast.rating.length + 1)).toFixed(1);
+                                    res.json({like, newRating});
+                                }).catch(next);
                         }).catch(next);
                     }).catch(next);
             } else {
@@ -71,10 +81,19 @@ router.put('/like/:likeId', putLike, (req, res, next) => {
         .catch(next);
 });
 
-router.delete('/like/:likeId', (req, res, next) => {
+router.delete('/like/:likeId/metcast/:metcastId', (req, res, next) => {
     Like.remove({_id: req.params.likeId})
         .then(() => {
-            res.json({message: 'Like delete!'});
+            Metcast
+                .findOne({_id: req.params.metcastId}).populate('rating')
+                .then(metcast => {
+                    let ratingSum = 0;
+                    for (let i = 0; i < metcast.rating.length; i++) {
+                        ratingSum += metcast.rating[i].isPositive;
+                    }
+                    let newRating = metcast.rating.length ? (ratingSum / metcast.rating.length).toFixed(1) : '0.0';
+                    res.json({message: 'Like delete!', newRating});
+                }).catch(next);
         })
         .catch(next);
 });

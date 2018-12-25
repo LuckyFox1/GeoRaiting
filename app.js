@@ -20,6 +20,13 @@ http.createServer(app).listen(config.port, function () {
     console.log('Express server listening on port ' + config.port);
 });
 
+/*app.use((req, res, next) => {
+    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3001');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+
+    next();
+});*/
+
 app.use((req, res, next) => {
     const err = new Error(`Not Found ${req.path}`);
     err.status = 404;
